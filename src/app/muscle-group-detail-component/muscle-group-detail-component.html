@@ -1,0 +1,24 @@
+@if (muscleGroup$ | async; as muscleGroup) {
+  <article class="bg-white border-gray-200 border-2 p-6 shadow max-w-2xl mx-auto">
+    <h1 class="text-4xl font-bold my-3">{{ muscleGroup.name }}</h1>
+    <h4 class="text-xl text-gray-500 my-2">{{ muscleGroup.description }}</h4>
+
+    <h2 class="text-2xl font-semibold mt-6 mb-3">Exercises</h2>
+    <ul class="list-disc list-inside space-y-2">
+      @for (exercise of muscleGroup.exercises; track exercise.id) {
+        <li>
+          <span class="font-semibold">{{ exercise.name }}</span> — {{ exercise.description }}
+        </li>
+      }
+    </ul>
+
+    <p class="py-4">
+      <button
+        class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded"
+        (click)="goBack()"
+      >
+        Back to list
+      </button>
+    </p>
+  </article>
+}

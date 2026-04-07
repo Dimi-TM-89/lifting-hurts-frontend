@@ -1,0 +1,108 @@
+<nav class="bg-white border-gray-200 px-2 sm:px-4 py-2.5">
+  <div class="container flex flex-wrap justify-between items-center mx-auto">
+    <a href="#" class="flex items-center">
+      <span class="self-center text-xl font-semibold">Lifting Hurts</span>
+    </a>
+    <button
+      (click)="toggleHamburger()"
+      type="button"
+      class="inline-flex items-center p-2 ml-3 text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200"
+      [attr.aria-expanded]="hamburgerOpen"
+    >
+      <span class="sr-only">Open main menu</span>
+      <svg
+        class="w-6 h-6"
+        aria-hidden="true"
+        fill="currentColor"
+        viewBox="0 0 20 20"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          fill-rule="evenodd"
+          d="M3 5a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 10a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM3 15a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z"
+          clip-rule="evenodd"
+        ></path>
+      </svg>
+    </button>
+    <div class="w-full md:w-auto md:block" [ngClass]="hamburgerOpen ? 'block' : 'hidden'">
+      <ul
+        class="flex flex-col p-4 mt-4 bg-gray-50 rounded-lg border border-gray-100 md:flex-row md:space-x-8 md:mt-0 md:text-sm md:font-medium md:border-0 md:bg-white"
+      >
+        <li>
+          <a
+            (click)="onHamburgerItemClick()"
+            routerLink="/"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="block py-2 pr-4 pl-3 rounded"
+            >Home</a
+          >
+        </li>
+        <li>
+          <a
+            (click)="onHamburgerItemClick()"
+            routerLink="/muscle-groups"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="block py-2 pr-4 pl-3 rounded"
+            >Muscle Groups</a
+          >
+        </li>
+        <li>
+          <a
+            (click)="onHamburgerItemClick()"
+            routerLink="/exercises"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="block py-2 pr-4 pl-3 rounded"
+            >Exercises</a
+          >
+        </li>
+        <li>
+          <a
+            (click)="onHamburgerItemClick()"
+            routerLink="/workout-sessions"
+            routerLinkActive="active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="block py-2 pr-4 pl-3 rounded"
+            >Workouts</a
+          >
+        </li>
+        <li>
+          <button
+            (click)="onAdminDropDownClick()"
+            class="flex justify-between items-center py-2 pr-4 pl-3 w-full"
+          >
+            Admin
+            <svg
+              class="ml-1 w-5 h-5"
+              aria-hidden="true"
+              fill="currentColor"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                fill-rule="evenodd"
+                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                clip-rule="evenodd"
+              ></path>
+            </svg>
+          </button>
+          @if (adminDropdownOpen) {
+            <div (mouseleave)="closeAdminDropDown()" class="z-10 w-44 font-normal shadow">
+              <ul class="py-1 text-sm text-gray-700">
+                <li>
+                  <a
+                    (click)="navigateTo('admin/muscle-groups')"
+                    class="block py-2 px-4 hover:bg-gray-100 cursor-pointer"
+                    >Muscle Groups</a
+                  >
+                </li>
+              </ul>
+            </div>
+          }
+        </li>
+      </ul>
+    </div>
+  </div>
+</nav>
