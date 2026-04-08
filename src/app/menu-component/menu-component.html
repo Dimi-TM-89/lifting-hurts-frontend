@@ -58,50 +58,74 @@
             >Exercises</a
           >
         </li>
-        <li>
-          <a
-            (click)="onHamburgerItemClick()"
-            routerLink="/workout-sessions"
-            routerLinkActive="active"
-            [routerLinkActiveOptions]="{ exact: true }"
-            class="block py-2 pr-4 pl-3 rounded"
-            >Workouts</a
-          >
-        </li>
-        <li>
-          <button
-            (click)="onAdminDropDownClick()"
-            class="flex justify-between items-center py-2 pr-4 pl-3 w-full"
-          >
-            Admin
-            <svg
-              class="ml-1 w-5 h-5"
-              aria-hidden="true"
-              fill="currentColor"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
+        @if (isAuth()) {
+          <li>
+            <a
+              (click)="onHamburgerItemClick()"
+              routerLink="/workout-sessions"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: true }"
+              class="block py-2 pr-4 pl-3 rounded"
+              >Workouts</a
             >
-              <path
-                fill-rule="evenodd"
-                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                clip-rule="evenodd"
-              ></path>
-            </svg>
-          </button>
-          @if (adminDropdownOpen) {
-            <div (mouseleave)="closeAdminDropDown()" class="z-10 w-44 font-normal shadow">
-              <ul class="py-1 text-sm text-gray-700">
-                <li>
-                  <a
-                    (click)="navigateTo('admin/muscle-groups')"
-                    class="block py-2 px-4 hover:bg-gray-100 cursor-pointer"
-                    >Muscle Groups</a
-                  >
-                </li>
-              </ul>
-            </div>
-          }
-        </li>
+          </li>
+          <li>
+            <button
+              (click)="onAdminDropDownClick()"
+              class="flex justify-between items-center py-2 pr-4 pl-3 w-full"
+            >
+              Admin
+              <svg
+                class="ml-1 w-5 h-5"
+                aria-hidden="true"
+                fill="currentColor"
+                viewBox="0 0 20 20"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  fill-rule="evenodd"
+                  d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                  clip-rule="evenodd"
+                ></path>
+              </svg>
+            </button>
+            @if (adminDropdownOpen) {
+              <div (mouseleave)="closeAdminDropDown()" class="z-10 w-44 font-normal shadow">
+                <ul class="py-1 text-sm text-gray-700">
+                  <li>
+                    <a
+                      (click)="navigateTo('admin/muscle-groups')"
+                      class="block py-2 px-4 hover:bg-gray-100 cursor-pointer"
+                      >Muscle Groups</a
+                    >
+                  </li>
+                </ul>
+              </div>
+            }
+          </li>
+          <li class="flex items-center">
+            <span class="text-sm text-gray-600 py-2 pr-4 pl-3"
+              >Hi, {{ user()?.nickname || user()?.name }}</span
+            >
+          </li>
+          <li>
+            <button
+              class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 cursor-pointer"
+              (click)="logout()"
+            >
+              Log out
+            </button>
+          </li>
+        } @else {
+          <li>
+            <button
+              class="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 cursor-pointer"
+              (click)="login()"
+            >
+              Log in
+            </button>
+          </li>
+        }
       </ul>
     </div>
   </div>
