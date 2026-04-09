@@ -24,11 +24,8 @@ export const appConfig: ApplicationConfig = {
       },
       httpInterceptor: {
         allowedList: [
-          // Only attach token to these protected endpoints
-          {
-            uri: `${environment.apiUrl}/workout-sessions*`,
-            tokenOptions: { authorizationParams: { audience: environment.auth0.audience } },
-          },
+          { uri: `${environment.apiUrl}/workout-sessions*` },
+          { uri: `${environment.apiUrl}/workout-sessions/*` },
           { uri: `${environment.apiUrl}/muscle-groups*`, httpMethod: 'POST' },
           { uri: `${environment.apiUrl}/muscle-groups/*`, httpMethod: 'PUT' },
           { uri: `${environment.apiUrl}/muscle-groups/*`, httpMethod: 'DELETE' },

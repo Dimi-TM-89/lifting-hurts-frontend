@@ -1,7 +1,9 @@
+import { Exercise } from './exercise';
+
 export interface WorkoutSet {
   id: number;
   setNumber: number;
   reps: number;
   weightKg: number;
-  exerciseId?: number;
+  exercise?: Exercise;
 }

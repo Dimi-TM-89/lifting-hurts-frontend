@@ -9,14 +9,21 @@ import { MuscleGroupFormComponent } from './muscle-group-form-component/muscle-g
 import { ExerciseComponent } from './exercise-component/exercise-component';
 import { WorkoutSessionComponent } from './workout-session-component/workout-session-component';
 import { CallbackComponent } from './callback-component/callback-component';
+import { ExerciseListComponent } from './exercise-list-component/exercise-list-component';
+import { WorkoutSessionFormComponent } from './workout-session-form-component/workout-session-form-component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'callback', component: CallbackComponent },
   { path: 'muscle-groups', component: MuscleGroupListComponent },
   { path: 'muscle-groups/:id', component: MuscleGroupDetailComponent },
-  { path: 'exercises', component: ExerciseComponent },
+  { path: 'exercises', component: ExerciseListComponent },
   // Requires login (any authenticated user)
+  {
+    path: 'workout-sessions/new',
+    component: WorkoutSessionFormComponent,
+    canActivate: [AuthGuard],
+  },
   { path: 'workout-sessions', component: WorkoutSessionComponent, canActivate: [AuthGuard] },
   // Requires admin role
   {

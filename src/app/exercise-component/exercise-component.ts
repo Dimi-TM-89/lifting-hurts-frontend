@@ -1,4 +1,5 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
+import { Exercise } from '../exercise';
 
 @Component({
   selector: 'app-exercise-component',
@@ -7,5 +8,5 @@ import { Component } from '@angular/core';
   styleUrl: './exercise-component.css',
 })
 export class ExerciseComponent {
-
+  @Input() exercise!: Exercise;
 }

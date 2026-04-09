@@ -1,1 +1,92 @@
-<p>workout-session-component works!</p>
+<div class="container mx-auto mt-8">
+  @if (errorMessage()) {
+    <div class="rounded p-4 mb-4 text-lg bg-red-200 text-red-800 border-2 border-red-300">
+      {{ errorMessage() }}
+    </div>
+  }
+
+  <div class="mb-4">
+    <h1 class="text-3xl font-bold">My Workouts</h1>
+    <div class="flex justify-end mt-2">
+      <button
+        class="px-4 py-2 rounded-md bg-sky-500 text-sky-100 hover:bg-sky-600"
+        (click)="newSession()"
+      >
+        New Workout Session
+      </button>
+    </div>
+  </div>
+
+  @if (sessions$ | async; as sessions) {
+    @if (sessions.length === 0) {
+      <p class="text-gray-500">No workout sessions yet. Start your first one!</p>
+    } @else {
+      <div class="space-y-4">
+        @for (session of sessions; track session.id) {
+          <div class="bg-white border border-gray-200 rounded-lg shadow p-6">
+            <div class="flex justify-between items-start">
+              <div>
+                <h2 class="text-xl font-semibold">{{ session.notes || 'Workout Session' }}</h2>
+                <p class="text-sm text-gray-500 mt-1">
+                  {{ session.startedAt | date: 'medium' }} —
+                  {{ session.endedAt | date: 'shortTime' }}
+                </p>
+              </div>
+              <button (click)="deleteSession(session.id)" class="text-red-500 hover:text-red-700">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  class="w-6 h-6"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                  />
+                </svg>
+              </button>
+            </div>
+
+            @if (session.workoutSets && session.workoutSets.length > 0) {
+              <table class="min-w-full mt-4">
+                <thead>
+                  <tr>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 bg-gray-50">
+                      Exercise
+                    </th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 bg-gray-50">
+                      Set #
+                    </th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 bg-gray-50">
+                      Reps
+                    </th>
+                    <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 bg-gray-50">
+                      Weight (kg)
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (set of session.workoutSets; track set.id) {
+                    <tr>
+                      <td class="px-4 py-2 border-t font-medium">
+                        {{ set.exercise?.name ?? 'Unknown' }}
+                      </td>
+                      <td class="px-4 py-2 border-t">{{ set.setNumber }}</td>
+                      <td class="px-4 py-2 border-t">{{ set.reps }}</td>
+                      <td class="px-4 py-2 border-t">{{ set.weightKg }}</td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            } @else {
+              <p class="text-sm text-gray-400 mt-3">No sets logged yet.</p>
+            }
+          </div>
+        }
+      </div>
+    }
+  }
+</div>

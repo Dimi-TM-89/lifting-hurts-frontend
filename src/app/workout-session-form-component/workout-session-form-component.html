@@ -1,0 +1,145 @@
+@if (errorMessage()) {
+  <div class="rounded p-4 mb-4 text-lg bg-red-200 text-red-800 border-2 border-red-300">
+    {{ errorMessage() }}
+  </div>
+}
+
+<!-- BEFORE SESSION STARTS -->
+@if (!isActive && !session) {
+  <div class="text-center mt-16">
+    <h1 class="text-4xl font-bold mb-6">Ready to work out?</h1>
+    <button
+      (click)="startSession()"
+      class="bg-green-600 hover:bg-green-700 text-white font-bold py-4 px-8 rounded-lg text-xl cursor-pointer"
+    >
+      Start Session
+    </button>
+  </div>
+}
+
+<!-- ACTIVE SESSION -->
+@if (isActive && session) {
+  <div class="container mx-auto">
+    <div class="flex justify-between items-center mb-6">
+      <div>
+        <h1 class="text-3xl font-bold">Workout in Progress</h1>
+        <p class="text-gray-500 mt-1">Started at {{ startTime | date: 'shortTime' }}</p>
+      </div>
+      <button
+        (click)="endSession()"
+        class="bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg cursor-pointer"
+      >
+        End Session
+      </button>
+    </div>
+
+    <!-- Notes -->
+    <div class="mb-6">
+      <label class="block mb-2 text-sm font-medium text-gray-900">Session Notes</label>
+      <input
+        type="text"
+        [value]="session.notes"
+        (input)="updateNotes($event)"
+        class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+        placeholder="e.g. Push day — chest & triceps"
+      />
+    </div>
+
+    <!-- Add Set Form (Reactive Form) -->
+    <div class="bg-white border border-gray-200 rounded-lg shadow p-6 mb-6">
+      <h2 class="text-xl font-semibold mb-4">Add a Set</h2>
+      <form
+        [formGroup]="setForm"
+        (ngSubmit)="addSet()"
+        class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end"
+      >
+        <div>
+          <label class="block mb-2 text-sm font-medium text-gray-900">Exercise</label>
+          <select
+            formControlName="exerciseId"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+          >
+            <option value="" disabled>Select exercise</option>
+            @for (exercise of exercises(); track exercise.id) {
+              <option [value]="exercise.id">{{ exercise.name }}</option>
+            }
+          </select>
+          @if (setForm.get('exerciseId')?.invalid && setForm.get('exerciseId')?.touched) {
+            <p class="text-red-500 text-sm mt-1">Select an exercise</p>
+          }
+        </div>
+        <div>
+          <label class="block mb-2 text-sm font-medium text-gray-900">Reps</label>
+          <input
+            type="number"
+            formControlName="reps"
+            placeholder="Enter reps"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+          />
+          @if (setForm.get('reps')?.invalid && setForm.get('reps')?.touched) {
+            <p class="text-red-500 text-sm mt-1">Enter reps (min 1)</p>
+          }
+        </div>
+        <div>
+          <label class="block mb-2 text-sm font-medium text-gray-900">Weight (kg)</label>
+          <input
+            type="number"
+            formControlName="weightKg"
+            placeholder="Enter weight"
+            step="0.5"
+            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
+          />
+          @if (setForm.get('weightKg')?.invalid && setForm.get('weightKg')?.touched) {
+            <p class="text-red-500 text-sm mt-1">Enter weight (min 0)</p>
+          }
+        </div>
+        <div>
+          <button
+            type="submit"
+            [disabled]="setForm.invalid"
+            class="w-full text-white bg-blue-700 enabled:hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5 disabled:opacity-75 cursor-pointer"
+          >
+            Add Set
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Logged Sets -->
+    <div class="bg-white border border-gray-200 rounded-lg shadow p-6">
+      <h2 class="text-xl font-semibold mb-4">Logged Sets</h2>
+      @if (session.workoutSets && session.workoutSets.length > 0) {
+        <table class="min-w-full">
+          <thead>
+            <tr>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 bg-gray-50">
+                Exercise
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 bg-gray-50">
+                Set #
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 bg-gray-50">Reps</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 bg-gray-50">
+                Weight (kg)
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (set of session.workoutSets; track set.id) {
+              <tr>
+                <td class="px-4 py-2 border-t font-medium">
+                  {{ set.exercise?.name ?? 'Unknown' }}
+                </td>
+                <td class="px-4 py-2 border-t">{{ set.setNumber }}</td>
+                <td class="px-4 py-2 border-t">{{ set.reps }}</td>
+                <td class="px-4 py-2 border-t">{{ set.weightKg }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      } @else {
+        <p class="text-gray-400">No sets logged yet. Add your first set above!</p>
+      }
+    </div>
+  </div>
+}
