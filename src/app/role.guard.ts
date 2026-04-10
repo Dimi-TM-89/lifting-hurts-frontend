@@ -1,3 +1,14 @@
+/*
+ * Access control has three levels:
+ * 1. Visitor (unauthenticated) — public routes, no guard
+ * 2. Registered user (authenticated) — protected by AuthGuard (login check only)
+ * 3. Admin (authenticated + lifting-hurts-admin role) — protected by roleGuard
+ *
+ * The lifting-hurts-user role defined in Auth0 is not used here because
+ * AuthGuard already distinguishes registered users from visitors
+ * based on authentication status alone.
+ */
+
 import { inject } from '@angular/core';
 import { CanActivateFn, Router } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';

@@ -1,0 +1,103 @@
+@if (isSubmitted && errorMessage()) {
+  <div class="rounded p-4 mb-4 text-lg bg-red-200 text-red-800 border-2 border-red-300">
+    {{ errorMessage() }}
+  </div>
+}
+
+<h1 class="text-3xl mb-4">
+  @if (isAdd) {
+    Add Exercise
+  }
+  @if (isEdit) {
+    Edit Exercise
+  }
+</h1>
+
+<form (ngSubmit)="onSubmit()" #exForm="ngForm">
+  <div class="mb-6">
+    <label for="name" class="block mb-2 text-sm font-medium text-gray-900">Name</label>
+    <input
+      type="text"
+      id="name"
+      name="name"
+      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+      placeholder="Exercise name"
+      required
+      [(ngModel)]="exerciseData().name"
+      #name="ngModel"
+    />
+    <div [hidden]="name.valid || name.pristine" class="text-red-500 mt-2">Name is required</div>
+  </div>
+
+  <div class="mb-6">
+    <label for="description" class="block mb-2 text-sm font-medium text-gray-900"
+      >Description</label
+    >
+    <input
+      type="text"
+      id="description"
+      name="description"
+      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+      placeholder="Description"
+      required
+      [(ngModel)]="exerciseData().description"
+      #description="ngModel"
+    />
+    <div [hidden]="description.valid || description.pristine" class="text-red-500 mt-2">
+      Description is required
+    </div>
+  </div>
+
+  <div class="mb-6">
+    <label for="muscleGroupId" class="block mb-2 text-sm font-medium text-gray-900"
+      >Muscle Group</label
+    >
+    <select
+      id="muscleGroupId"
+      name="muscleGroupId"
+      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+      required
+      [(ngModel)]="exerciseData().muscleGroupId"
+      #muscleGroupId="ngModel"
+    >
+      <option [value]="0" disabled>Select a muscle group</option>
+      @for (mg of muscleGroups(); track mg.id) {
+        <option [value]="mg.id">{{ mg.name }}</option>
+      }
+    </select>
+    <div [hidden]="muscleGroupId.valid || muscleGroupId.pristine" class="text-red-500 mt-2">
+      Muscle group is required
+    </div>
+  </div>
+
+  <div class="mb-6">
+    <label for="imageUrl" class="block mb-2 text-sm font-medium text-gray-900">Image URL</label>
+    <input
+      type="text"
+      id="imageUrl"
+      name="imageUrl"
+      class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5"
+      placeholder="Image URL (optional)"
+      [(ngModel)]="exerciseData().imageUrl"
+    />
+  </div>
+
+  @if (isAdd) {
+    <button
+      type="submit"
+      [disabled]="!exForm.form.valid || isSubmitted"
+      class="text-white bg-blue-700 enabled:hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center disabled:opacity-75"
+    >
+      Add
+    </button>
+  }
+  @if (isEdit) {
+    <button
+      type="submit"
+      [disabled]="!exForm.form.valid || isSubmitted"
+      class="text-white bg-blue-700 enabled:hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm w-full sm:w-auto px-5 py-2.5 text-center disabled:opacity-75"
+    >
+      Save
+    </button>
+  }
+</form>

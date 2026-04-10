@@ -1,10 +1,11 @@
-import { Component, inject, OnInit, signal, ChangeDetectorRef } from '@angular/core';
+import { Component, inject, OnInit, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { AuthService } from '@auth0/auth0-angular';
 import { WorkoutSessionService } from '../workout-session-service';
 import { ExerciseService } from '../exercise-service';
+import { MuscleGroupService } from '../muscle-group-service';
 import { Exercise } from '../exercise';
+import { MuscleGroup } from '../muscle-group';
 import { WorkoutSession } from '../workout-session';
 import { HttpErrorResponse } from '@angular/common/http';
 import { DatePipe } from '@angular/common';
@@ -21,16 +22,38 @@ export class WorkoutSessionFormComponent implements OnInit {
   startTime: Date | null = null;
 
   setForm!: FormGroup;
+
+  // Data
   exercises = signal<Exercise[]>([]);
+  muscleGroups = signal<MuscleGroup[]>([]);
   errorMessage = signal<string>('');
 
-  private userId = '';
+  // Exercise picker state
+  searchQuery = signal<string>('');
+  selectedMuscleGroupId = signal<number>(0); // 0 = all
+  selectedExercise = signal<Exercise | null>(null);
+  exercisePickerOpen = signal<boolean>(false);
+
+  // Filtered exercises (computed)
+  filteredExercises = computed(() => {
+    let list = this.exercises();
+    const mgId = this.selectedMuscleGroupId();
+    const query = this.searchQuery().toLowerCase().trim();
+
+    if (mgId > 0) {
+      list = list.filter((e) => e.muscleGroupId === mgId);
+    }
+    if (query) {
+      list = list.filter((e) => e.name.toLowerCase().includes(query));
+    }
+    return list;
+  });
 
   private fb = inject(FormBuilder);
   private router = inject(Router);
-  private auth = inject(AuthService);
   private sessionService = inject(WorkoutSessionService);
   private exerciseService = inject(ExerciseService);
+  private muscleGroupService = inject(MuscleGroupService);
   private cdr = inject(ChangeDetectorRef);
 
   ngOnInit(): void {
@@ -40,21 +63,46 @@ export class WorkoutSessionFormComponent implements OnInit {
       weightKg: [null, [Validators.required, Validators.min(0)]],
     });
 
-    this.auth.user$.subscribe((user) => {
-      if (user?.sub) {
-        this.userId = user.sub;
-      }
-    });
-
     this.exerciseService.getExercises().subscribe((exercises) => {
       this.exercises.set(exercises);
     });
+
+    this.muscleGroupService.getMuscleGroups().subscribe((groups) => {
+      this.muscleGroups.set(groups);
+    });
+  }
+
+  // Exercise picker methods
+  toggleExercisePicker(): void {
+    this.exercisePickerOpen.update((v) => !v);
+    this.cdr.markForCheck();
+  }
+
+  onSearchInput(event: Event): void {
+    this.searchQuery.set((event.target as HTMLInputElement).value);
+    this.cdr.markForCheck();
+  }
+
+  filterByMuscleGroup(id: number): void {
+    this.selectedMuscleGroupId.set(id);
+    this.cdr.markForCheck();
+  }
+
+  selectExercise(exercise: Exercise): void {
+    this.selectedExercise.set(exercise);
+    this.setForm.patchValue({ exerciseId: exercise.id });
+    this.exercisePickerOpen.set(false);
+    this.cdr.markForCheck();
+  }
+
+  getMuscleGroupName(mgId: number): string {
+    const mg = this.muscleGroups().find((g) => g.id === mgId);
+    return mg ? mg.name : '';
   }
 
   startSession(): void {
     this.startTime = new Date();
     const session = {
-      auth0UserId: this.userId,
       startedAt: this.formatDateTime(this.startTime),
       endedAt: this.formatDateTime(this.startTime),
       notes: '',
@@ -76,7 +124,6 @@ export class WorkoutSessionFormComponent implements OnInit {
     const formValue = this.setForm.value;
     const exerciseId = +formValue.exerciseId;
 
-    // Auto-calculate set number: count existing sets for this exercise + 1
     const existingSets = this.session.workoutSets
       ? this.session.workoutSets.filter((s) => s.exercise?.id === exerciseId)
       : [];
@@ -92,7 +139,6 @@ export class WorkoutSessionFormComponent implements OnInit {
       .subscribe({
         next: (updated) => {
           this.session = updated;
-          // Keep the exercise selected, clear reps/weight for next set
           this.setForm.patchValue({ reps: null, weightKg: null });
           this.setForm.get('reps')?.markAsUntouched();
           this.setForm.get('weightKg')?.markAsUntouched();
@@ -108,7 +154,6 @@ export class WorkoutSessionFormComponent implements OnInit {
 
     const endTime = new Date();
     const updatedSession = {
-      auth0UserId: this.userId,
       startedAt: this.formatDateTime(this.startTime!),
       endedAt: this.formatDateTime(endTime),
       notes: this.session.notes,
@@ -124,12 +169,6 @@ export class WorkoutSessionFormComponent implements OnInit {
     if (this.session) {
       this.session.notes = (event.target as HTMLInputElement).value;
     }
-  }
-
-  getNextSetNumber(exerciseId: number): number {
-    if (!this.session?.workoutSets) return 1;
-    const sets = this.session.workoutSets.filter((s) => s.exercise?.id === exerciseId);
-    return sets.length + 1;
   }
 
   private formatDateTime(date: Date): string {

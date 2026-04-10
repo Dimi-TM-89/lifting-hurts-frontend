@@ -1,7 +1,6 @@
 import { Component, inject, OnInit, ChangeDetectorRef, signal } from '@angular/core';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { Observable } from 'rxjs';
-import { AuthService } from '@auth0/auth0-angular';
 import { WorkoutSession } from '../workout-session';
 import { WorkoutSessionService } from '../workout-session-service';
 import { Router } from '@angular/router';
@@ -16,24 +15,16 @@ export class WorkoutSessionComponent implements OnInit {
   sessions$!: Observable<WorkoutSession[]>;
   errorMessage = signal<string>('');
 
-  private auth = inject(AuthService);
   private sessionService = inject(WorkoutSessionService);
   private router = inject(Router);
   private cdr = inject(ChangeDetectorRef);
 
-  private userId = '';
-
   ngOnInit(): void {
-    this.auth.user$.subscribe((user) => {
-      if (user?.sub) {
-        this.userId = user.sub;
-        this.loadSessions();
-      }
-    });
+    this.loadSessions();
   }
 
   loadSessions(): void {
-    this.sessions$ = this.sessionService.getSessionsByUser(this.userId);
+    this.sessions$ = this.sessionService.getMySessions();
     this.cdr.markForCheck();
   }
 

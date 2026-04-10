@@ -11,6 +11,8 @@ import { WorkoutSessionComponent } from './workout-session-component/workout-ses
 import { CallbackComponent } from './callback-component/callback-component';
 import { ExerciseListComponent } from './exercise-list-component/exercise-list-component';
 import { WorkoutSessionFormComponent } from './workout-session-form-component/workout-session-form-component';
+import { ExerciseAdminListComponent } from './exercise-admin-list-component/exercise-admin-list-component';
+import { ExerciseFormComponent } from './exercise-form-component/exercise-form-component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
@@ -35,6 +37,18 @@ export const routes: Routes = [
   {
     path: 'admin/muscle-groups/form',
     component: MuscleGroupFormComponent,
+    canActivate: [roleGuard],
+    data: { roles: ['lifting-hurts-admin'] },
+  },
+  {
+    path: 'admin/exercises',
+    component: ExerciseAdminListComponent,
+    canActivate: [roleGuard],
+    data: { roles: ['lifting-hurts-admin'] },
+  },
+  {
+    path: 'admin/exercises/form',
+    component: ExerciseFormComponent,
     canActivate: [roleGuard],
     data: { roles: ['lifting-hurts-admin'] },
   },

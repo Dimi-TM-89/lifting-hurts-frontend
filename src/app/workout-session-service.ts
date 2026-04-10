@@ -11,21 +11,29 @@ export class WorkoutSessionService {
   private apiUrl = `${environment.apiUrl}/workout-sessions`;
   private httpClient = inject(HttpClient);
 
-  getSessionsByUser(auth0UserId: string): Observable<WorkoutSession[]> {
-    return this.httpClient.get<WorkoutSession[]>(`${this.apiUrl}/by-user/${auth0UserId}`);
+  // Authenticated user: get own sessions (backend extracts user from JWT)
+  getMySessions(): Observable<WorkoutSession[]> {
+    return this.httpClient.get<WorkoutSession[]>(`${this.apiUrl}/my-sessions`);
   }
 
   getSessionById(id: number): Observable<WorkoutSession> {
     return this.httpClient.get<WorkoutSession>(`${this.apiUrl}/${id}`);
   }
 
+  // No need to pass auth0UserId — backend overrides it from JWT
   createSession(session: {
-    auth0UserId: string;
     startedAt: string;
     endedAt: string;
     notes: string;
   }): Observable<WorkoutSession> {
     return this.httpClient.post<WorkoutSession>(this.apiUrl, session);
+  }
+
+  updateSession(
+    id: number,
+    session: { startedAt: string; endedAt: string; notes: string },
+  ): Observable<WorkoutSession> {
+    return this.httpClient.put<WorkoutSession>(`${this.apiUrl}/${id}`, session);
   }
 
   deleteSession(id: number): Observable<void> {
@@ -37,12 +45,5 @@ export class WorkoutSessionService {
     set: { exerciseId: number; setNumber: number; reps: number; weightKg: number },
   ): Observable<WorkoutSession> {
     return this.httpClient.post<WorkoutSession>(`${this.apiUrl}/${sessionId}/sets`, set);
-  }
-
-  updateSession(
-    id: number,
-    session: { auth0UserId: string; startedAt: string; endedAt: string; notes: string },
-  ): Observable<WorkoutSession> {
-    return this.httpClient.put<WorkoutSession>(`${this.apiUrl}/${id}`, session);
   }
 }

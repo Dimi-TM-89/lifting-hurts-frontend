@@ -45,29 +45,110 @@
       />
     </div>
 
-    <!-- Add Set Form (Reactive Form) -->
+    <!-- Add Set Form -->
     <div class="bg-white border border-gray-200 rounded-lg shadow p-6 mb-6">
       <h2 class="text-xl font-semibold mb-4">Add a Set</h2>
+
+      <!-- Exercise Picker -->
+      <div class="mb-4">
+        <label class="block mb-2 text-sm font-medium text-gray-900">Exercise</label>
+        <button
+          type="button"
+          (click)="toggleExercisePicker()"
+          class="w-full text-left bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 flex justify-between items-center cursor-pointer hover:bg-gray-100"
+        >
+          @if (selectedExercise()) {
+            <span>
+              <span class="font-medium">{{ selectedExercise()!.name }}</span>
+              <span class="text-gray-400 ml-2">{{
+                getMuscleGroupName(selectedExercise()!.muscleGroupId ?? 0)
+              }}</span>
+            </span>
+          } @else {
+            <span class="text-gray-400">Select an exercise...</span>
+          }
+          <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M19 9l-7 7-7-7"
+            />
+          </svg>
+        </button>
+
+        <!-- Picker panel -->
+        @if (exercisePickerOpen()) {
+          <div class="mt-2 border border-gray-200 rounded-lg shadow-lg bg-white p-4">
+            <!-- Search -->
+            <input
+              type="text"
+              [value]="searchQuery()"
+              (input)="onSearchInput($event)"
+              placeholder="Search exercises..."
+              class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 mb-3"
+            />
+
+            <!-- Muscle Group Filter -->
+            <div class="flex flex-wrap gap-2 mb-3">
+              <button
+                type="button"
+                (click)="filterByMuscleGroup(0)"
+                class="px-3 py-1 rounded-full text-xs font-medium cursor-pointer"
+                [class]="
+                  selectedMuscleGroupId() === 0
+                    ? 'bg-blue-600 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                "
+              >
+                All
+              </button>
+              @for (mg of muscleGroups(); track mg.id) {
+                <button
+                  type="button"
+                  (click)="filterByMuscleGroup(mg.id)"
+                  class="px-3 py-1 rounded-full text-xs font-medium cursor-pointer"
+                  [class]="
+                    selectedMuscleGroupId() === mg.id
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  "
+                >
+                  {{ mg.name }}
+                </button>
+              }
+            </div>
+
+            <!-- Exercise List -->
+            <div class="max-h-60 overflow-y-auto">
+              @for (exercise of filteredExercises(); track exercise.id) {
+                <button
+                  type="button"
+                  (click)="selectExercise(exercise)"
+                  class="w-full text-left px-3 py-2 rounded hover:bg-blue-50 cursor-pointer flex justify-between items-center"
+                  [class.bg-blue-50]="selectedExercise()?.id === exercise.id"
+                >
+                  <span class="font-medium text-sm">{{ exercise.name }}</span>
+                  <span class="text-xs text-gray-400">{{
+                    getMuscleGroupName(exercise.muscleGroupId ?? 0)
+                  }}</span>
+                </button>
+              }
+              @if (filteredExercises().length === 0) {
+                <p class="text-gray-400 text-sm p-3 text-center">No exercises found.</p>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Reps & Weight + Add button -->
       <form
         [formGroup]="setForm"
         (ngSubmit)="addSet()"
-        class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end"
+        class="grid grid-cols-1 md:grid-cols-3 gap-4 items-end"
       >
-        <div>
-          <label class="block mb-2 text-sm font-medium text-gray-900">Exercise</label>
-          <select
-            formControlName="exerciseId"
-            class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
-          >
-            <option value="" disabled>Select exercise</option>
-            @for (exercise of exercises(); track exercise.id) {
-              <option [value]="exercise.id">{{ exercise.name }}</option>
-            }
-          </select>
-          @if (setForm.get('exerciseId')?.invalid && setForm.get('exerciseId')?.touched) {
-            <p class="text-red-500 text-sm mt-1">Select an exercise</p>
-          }
-        </div>
+        <input type="hidden" formControlName="exerciseId" />
         <div>
           <label class="block mb-2 text-sm font-medium text-gray-900">Reps</label>
           <input

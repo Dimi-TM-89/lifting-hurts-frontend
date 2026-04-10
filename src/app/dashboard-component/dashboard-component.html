@@ -1,0 +1,103 @@
+<!-- Period selector -->
+<div class="flex gap-2 mb-6">
+  <button
+    (click)="setPeriod('month')"
+    class="px-4 py-2 rounded-full text-sm font-medium cursor-pointer"
+    [class]="
+      selectedPeriod() === 'month'
+        ? 'bg-blue-600 text-white'
+        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+    "
+  >
+    Past month
+  </button>
+  <button
+    (click)="setPeriod('3months')"
+    class="px-4 py-2 rounded-full text-sm font-medium cursor-pointer"
+    [class]="
+      selectedPeriod() === '3months'
+        ? 'bg-blue-600 text-white'
+        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+    "
+  >
+    Past 3 months
+  </button>
+  <button
+    (click)="setPeriod('year')"
+    class="px-4 py-2 rounded-full text-sm font-medium cursor-pointer"
+    [class]="
+      selectedPeriod() === 'year'
+        ? 'bg-blue-600 text-white'
+        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+    "
+  >
+    Past year
+  </button>
+</div>
+
+<!-- Stats cards -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+  <div class="bg-white border border-gray-200 rounded-lg shadow p-6 text-center">
+    <p class="text-4xl font-bold text-blue-600">{{ totalWorkouts() }}</p>
+    <p class="text-sm text-gray-500 mt-1">Workouts</p>
+  </div>
+  <div class="bg-white border border-gray-200 rounded-lg shadow p-6 text-center">
+    <p class="text-4xl font-bold text-green-600">{{ totalSets() }}</p>
+    <p class="text-sm text-gray-500 mt-1">Total sets</p>
+  </div>
+  <div class="bg-white border border-gray-200 rounded-lg shadow p-6 text-center">
+    <p class="text-4xl font-bold text-orange-600">{{ formattedTime() }}</p>
+    <p class="text-sm text-gray-500 mt-1">Time spent</p>
+  </div>
+  <div class="bg-white border border-gray-200 rounded-lg shadow p-6 text-center">
+    <p class="text-4xl font-bold text-purple-600">{{ muscleGroupStats().length }}</p>
+    <p class="text-sm text-gray-500 mt-1">Muscle groups trained</p>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+  <!-- Top exercises -->
+  <div class="bg-white border border-gray-200 rounded-lg shadow p-6">
+    <h2 class="text-xl font-semibold mb-4">Top exercises</h2>
+    @if (topExercises().length > 0) {
+      @for (ex of topExercises(); track ex.name; let i = $index) {
+        <div
+          class="flex justify-between items-center py-2"
+          [class.border-t]="i > 0"
+          [class.border-gray-100]="i > 0"
+        >
+          <div class="flex items-center gap-3">
+            <span class="text-lg font-bold text-gray-300">{{ i + 1 }}</span>
+            <span class="font-medium text-sm">{{ ex.name }}</span>
+          </div>
+          <span class="text-sm text-gray-500">{{ ex.totalSets }} sets</span>
+        </div>
+      }
+    } @else {
+      <p class="text-gray-400 text-sm">No data yet.</p>
+    }
+  </div>
+
+  <!-- Muscle groups breakdown -->
+  <div class="bg-white border border-gray-200 rounded-lg shadow p-6">
+    <h2 class="text-xl font-semibold mb-4">Muscle groups trained</h2>
+    @if (muscleGroupStats().length > 0) {
+      @for (mg of muscleGroupStats(); track mg.name; let i = $index) {
+        <div class="mb-3">
+          <div class="flex justify-between text-sm mb-1">
+            <span class="font-medium">{{ mg.name }}</span>
+            <span class="text-gray-500">{{ mg.totalSets }} sets</span>
+          </div>
+          <div class="w-full bg-gray-100 rounded-full h-2">
+            <div
+              class="bg-blue-500 h-2 rounded-full"
+              [style.width.%]="(mg.totalSets / muscleGroupStats()[0].totalSets) * 100"
+            ></div>
+          </div>
+        </div>
+      }
+    } @else {
+      <p class="text-gray-400 text-sm">No data yet.</p>
+    }
+  </div>
+</div>

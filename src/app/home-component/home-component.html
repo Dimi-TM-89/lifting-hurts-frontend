@@ -1,2 +1,11 @@
 <h1 class="text-4xl font-bold">Welcome to Lifting Hurts</h1>
-<p class="text-lg text-gray-600 mt-4">Track your workouts, exercises, and muscle groups!</p>
+
+@if (isAuth()) {
+  <p class="text-lg text-gray-600 mt-2 mb-6">
+    Hey {{ user()?.nickname || user()?.name }}, here's your progress:
+  </p>
+  <app-dashboard-component></app-dashboard-component>
+} @else {
+  <p class="text-lg text-gray-600 mt-4">Track your workouts, exercises, and muscle groups!</p>
+  <p class="text-gray-500 mt-2">Log in to start tracking your progress.</p>
+}
