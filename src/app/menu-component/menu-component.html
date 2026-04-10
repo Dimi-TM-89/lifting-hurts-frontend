@@ -69,7 +69,7 @@
               >Workouts</a
             >
           </li>
-          <li>
+          <li [hidden]="!isAdmin()">
             <button
               (click)="onAdminDropDownClick()"
               class="flex justify-between items-center py-2 pr-4 pl-3 w-full"

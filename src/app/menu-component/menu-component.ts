@@ -1,5 +1,5 @@
 import { NgClass } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
 import { toSignal } from '@angular/core/rxjs-interop';
@@ -19,6 +19,11 @@ export class MenuComponent {
 
   readonly isAuth = toSignal(this.auth.isAuthenticated$, { initialValue: false });
   readonly user = toSignal(this.auth.user$, { initialValue: null });
+
+  readonly isAdmin = computed(() => {
+    const roles = this.user()?.['https://liftinghurts.example.com/roles'] as string[] | undefined;
+    return roles?.includes('lifting-hurts-admin') ?? false;
+  });
 
   toggleHamburger(): void {
     this.hamburgerOpen = !this.hamburgerOpen;
