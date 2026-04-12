@@ -1,0 +1,87 @@
+@if (exercise(); as ex) {
+  <div class="max-w-3xl mx-auto">
+    <!-- Exercise info -->
+    <div class="bg-white border border-gray-200 rounded-lg shadow p-6 mb-6">
+      @if (ex.imageUrl) {
+        <img [src]="ex.imageUrl" [alt]="ex.name" class="w-full h-64 object-cover rounded mb-4" />
+      }
+      <h1 class="text-4xl font-bold mb-2">{{ ex.name }}</h1>
+      <p class="text-gray-500 mb-3">{{ ex.description }}</p>
+      @if (muscleGroupName()) {
+        <span
+          class="inline-block px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium"
+        >
+          {{ muscleGroupName() }}
+        </span>
+      }
+    </div>
+
+    <!-- Stats (logged-in only) -->
+    @if (isAuth() && setHistory().length > 0) {
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="bg-white border border-gray-200 rounded-lg shadow p-6 text-center">
+          <p class="text-3xl font-bold text-orange-600">{{ heaviestWeight() }} kg</p>
+          <p class="text-sm text-gray-500 mt-1">Heaviest weight</p>
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg shadow p-6 text-center">
+          @if (bestWorkSet(); as best) {
+            <p class="text-3xl font-bold text-purple-600">{{ best.workSet }} kg</p>
+            <p class="text-sm text-gray-500 mt-1">
+              Best work set ({{ best.reps }} x {{ best.weightKg }}kg)
+            </p>
+          }
+        </div>
+        <div class="bg-white border border-gray-200 rounded-lg shadow p-6 text-center">
+          <p class="text-3xl font-bold text-blue-600">{{ totalSetsAllTime() }}</p>
+          <p class="text-sm text-gray-500 mt-1">Total sets logged</p>
+        </div>
+      </div>
+
+      <!-- Recent history -->
+      <div class="bg-white border border-gray-200 rounded-lg shadow p-6 mb-6">
+        <h2 class="text-xl font-semibold mb-4">Recent history</h2>
+        <table class="min-w-full">
+          <thead>
+            <tr>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 bg-gray-50">Date</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 bg-gray-50">
+                Set #
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 bg-gray-50">Reps</th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 bg-gray-50">
+                Weight (kg)
+              </th>
+              <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 bg-gray-50">
+                Volume
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (set of recentSets(); track $index) {
+              <tr>
+                <td class="px-4 py-2 border-t text-sm">{{ set.date | date: 'mediumDate' }}</td>
+                <td class="px-4 py-2 border-t">{{ set.setNumber }}</td>
+                <td class="px-4 py-2 border-t">{{ set.reps }}</td>
+                <td class="px-4 py-2 border-t">{{ set.weightKg }}</td>
+                <td class="px-4 py-2 border-t text-gray-500">{{ set.workSet }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    } @else if (isAuth() && setHistory().length === 0) {
+      <div class="bg-white border border-gray-200 rounded-lg shadow p-6 mb-6 text-center">
+        <p class="text-gray-400">
+          No history yet for this exercise. Start a workout to track your progress!
+        </p>
+      </div>
+    }
+
+    <button
+      (click)="goBack()"
+      class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded cursor-pointer"
+    >
+      Back to exercises
+    </button>
+  </div>
+}

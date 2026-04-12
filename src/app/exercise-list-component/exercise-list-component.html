@@ -1,6 +1,54 @@
 <h1 class="text-4xl font-bold">Exercises</h1>
-<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mx-auto py-6">
-  @for (exercise of exercises$ | async; track exercise.id) {
-    <app-exercise-component [exercise]="exercise"></app-exercise-component>
+
+<!-- Search bar -->
+<div class="mt-4 mb-3">
+  <input
+    type="text"
+    [value]="searchQuery()"
+    (input)="onSearchInput($event)"
+    placeholder="Search exercises..."
+    class="w-full md:w-96 bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5"
+  />
+</div>
+
+<!-- Muscle group filter pills -->
+<div class="flex flex-wrap gap-2 mb-6">
+  <button
+    (click)="filterByMuscleGroup(0)"
+    class="px-3 py-1 rounded-full text-xs font-medium cursor-pointer"
+    [class]="
+      selectedMuscleGroupId() === 0
+        ? 'bg-blue-600 text-white'
+        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+    "
+  >
+    All
+  </button>
+  @for (mg of muscleGroups(); track mg.id) {
+    <button
+      (click)="filterByMuscleGroup(mg.id)"
+      class="px-3 py-1 rounded-full text-xs font-medium cursor-pointer"
+      [class]="
+        selectedMuscleGroupId() === mg.id
+          ? 'bg-blue-600 text-white'
+          : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+      "
+    >
+      {{ mg.name }}
+    </button>
   }
 </div>
+
+<!-- Exercise grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mx-auto">
+  @for (exercise of filteredExercises(); track exercise.id) {
+    <app-exercise-component
+      [exercise]="exercise"
+      [muscleGroupName]="getMuscleGroupName(exercise.muscleGroupId ?? 0)"
+    ></app-exercise-component>
+  }
+</div>
+
+@if (filteredExercises().length === 0) {
+  <p class="text-gray-400 text-center mt-8">No exercises found.</p>
+}

@@ -25,6 +25,10 @@ export class MuscleGroupDetailComponent implements OnInit {
     }
   }
 
+  goToExercise(exerciseId: number): void {
+    this.router.navigate(['/exercises', exerciseId]);
+  }
+
   goBack(): void {
     this.router.navigate(['/muscle-groups']);
   }

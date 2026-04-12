@@ -1,8 +1,23 @@
 @if (exercise) {
   <article
-    class="flex flex-col justify-between h-full bg-white border-gray-200 border-2 p-6 shadow"
+    class="flex flex-col justify-between h-full bg-white border-gray-200 border-2 p-6 shadow hover:shadow-lg transition-shadow cursor-pointer"
+    (click)="viewDetails()"
   >
+    @if (exercise.imageUrl) {
+      <img
+        [src]="exercise.imageUrl"
+        [alt]="exercise.name"
+        class="w-full h-40 object-cover rounded mb-3"
+      />
+    }
     <h1 class="text-2xl font-bold my-2">{{ exercise.name }}</h1>
     <p class="text-gray-500 my-1">{{ exercise.description }}</p>
+    @if (muscleGroupName) {
+      <span
+        class="inline-block mt-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-medium w-fit"
+      >
+        {{ muscleGroupName }}
+      </span>
+    }
   </article>
 }

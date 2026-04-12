@@ -1,5 +1,6 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, inject } from '@angular/core';
 import { Exercise } from '../exercise';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-exercise-component',
@@ -9,4 +10,11 @@ import { Exercise } from '../exercise';
 })
 export class ExerciseComponent {
   @Input() exercise!: Exercise;
+  @Input() muscleGroupName = '';
+
+  private router = inject(Router);
+
+  viewDetails(): void {
+    this.router.navigate(['/exercises', this.exercise.id]);
+  }
 }

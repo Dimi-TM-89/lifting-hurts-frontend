@@ -13,12 +13,14 @@ import { ExerciseListComponent } from './exercise-list-component/exercise-list-c
 import { WorkoutSessionFormComponent } from './workout-session-form-component/workout-session-form-component';
 import { ExerciseAdminListComponent } from './exercise-admin-list-component/exercise-admin-list-component';
 import { ExerciseFormComponent } from './exercise-form-component/exercise-form-component';
+import { ExerciseDetailComponent } from './exercise-detail-component/exercise-detail-component';
 
 export const routes: Routes = [
   { path: '', component: HomeComponent },
   { path: 'callback', component: CallbackComponent },
   { path: 'muscle-groups', component: MuscleGroupListComponent },
   { path: 'muscle-groups/:id', component: MuscleGroupDetailComponent },
+  { path: 'exercises/:id', component: ExerciseDetailComponent },
   { path: 'exercises', component: ExerciseListComponent },
   // Requires login (any authenticated user)
   {

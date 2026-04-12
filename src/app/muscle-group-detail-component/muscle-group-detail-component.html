@@ -1,24 +1,52 @@
 @if (muscleGroup$ | async; as muscleGroup) {
-  <article class="bg-white border-gray-200 border-2 p-6 shadow max-w-2xl mx-auto">
-    <h1 class="text-4xl font-bold my-3">{{ muscleGroup.name }}</h1>
-    <h4 class="text-xl text-gray-500 my-2">{{ muscleGroup.description }}</h4>
-
-    <h2 class="text-2xl font-semibold mt-6 mb-3">Exercises</h2>
-    <ul class="list-disc list-inside space-y-2">
-      @for (exercise of muscleGroup.exercises; track exercise.id) {
-        <li>
-          <span class="font-semibold">{{ exercise.name }}</span> — {{ exercise.description }}
-        </li>
+  <div class="max-w-2xl mx-auto">
+    <article class="bg-white border-gray-200 border-2 p-6 shadow rounded-lg">
+      @if (muscleGroup.imageUrl) {
+        <img
+          [src]="muscleGroup.imageUrl"
+          [alt]="muscleGroup.name"
+          class="w-full max-h-64 object-contain rounded mb-4"
+        />
       }
-    </ul>
+      <h1 class="text-4xl font-bold my-3">{{ muscleGroup.name }}</h1>
+      <h4 class="text-xl text-gray-500 my-2">{{ muscleGroup.description }}</h4>
 
-    <p class="py-4">
-      <button
-        class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded"
-        (click)="goBack()"
-      >
-        Back to list
-      </button>
-    </p>
-  </article>
+      <h2 class="text-2xl font-semibold mt-6 mb-3">Exercises</h2>
+      <div class="space-y-2">
+        @for (exercise of muscleGroup.exercises; track exercise.id) {
+          <a
+            (click)="goToExercise(exercise.id)"
+            class="flex justify-between items-center p-3 rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 cursor-pointer transition-colors"
+          >
+            <div>
+              <span class="font-semibold">{{ exercise.name }}</span>
+              <span class="text-gray-500 ml-2 text-sm">{{ exercise.description }}</span>
+            </div>
+            <svg
+              class="w-5 h-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </a>
+        }
+      </div>
+
+      <p class="py-4">
+        <button
+          class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded cursor-pointer"
+          (click)="goBack()"
+        >
+          Back to list
+        </button>
+      </p>
+    </article>
+  </div>
 }
