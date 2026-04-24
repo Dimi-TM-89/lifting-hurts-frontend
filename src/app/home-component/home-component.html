@@ -1,3 +1,11 @@
+<!--
+  Two render branches based on auth state.
+  - @if / @else is the new built-in control-flow syntax (Angular 17+) — no need to import
+    NgIf, and the compiler can optimize it better than the old structural directives.
+  - `user()?.nickname || user()?.name` — Auth0 doesn't guarantee a `nickname`, so we fall
+    back to `name` (and the `?.` prevents a crash on the very first render before user$
+    has emitted).
+-->
 <h1 class="text-4xl font-bold">Welcome to Lifting Hurts</h1>
 
 @if (isAuth()) {

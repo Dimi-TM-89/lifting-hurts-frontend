@@ -1,3 +1,12 @@
+/*
+ * "My Workouts" page — list of past workout sessions for the logged-in user.
+ *
+ * Auth-only route (see app.routes.ts). The backend's /my-sessions endpoint resolves the
+ * user from the JWT, so the frontend never has to send a userId.
+ *
+ * Same refresh pattern as the admin list: re-assign the observable + markForCheck after
+ * every successful delete so AsyncPipe re-subscribes and the table re-renders.
+ */
 import { Component, inject, OnInit, ChangeDetectorRef, signal } from '@angular/core';
 import { AsyncPipe, DatePipe } from '@angular/common';
 import { Observable } from 'rxjs';

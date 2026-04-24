@@ -1,3 +1,23 @@
+/*
+ * Public list page for exercises with two filter mechanisms:
+ *   1. Free-text search on the name.
+ *   2. Filter pills by muscle group (0 = "All").
+ *
+ * Why client-side filtering instead of calling the backend each time?
+ *  - Single fetch on init → cheap, instant filter response, no debounce needed.
+ *  - The backend does have a `searchByName` endpoint (see exercise-service) for when the
+ *    catalog grows large enough that loading everything stops scaling.
+ *
+ * Reactivity:
+ *  - `exercises`, `muscleGroups`, `searchQuery`, `selectedMuscleGroupId` are all signals.
+ *  - `filteredExercises` is a `computed()` that re-derives whenever ANY of those change —
+ *    no manual `update()` calls anywhere.
+ *  - `cdr.markForCheck()` is needed in the async callbacks because we run zoneless and
+ *    HTTP responses fire outside a tracked event.
+ *
+ * `getMuscleGroupName` is a small helper used by the template to map the FK on each
+ * exercise to a display name from the muscleGroups signal — avoids a per-card HTTP call.
+ */
 import { Component, inject, OnInit, signal, computed, ChangeDetectorRef } from '@angular/core';
 import { ExerciseService } from '../exercise-service';
 import { MuscleGroupService } from '../muscle-group-service';
@@ -19,8 +39,9 @@ export class ExerciseListComponent implements OnInit {
   exercises = signal<Exercise[]>([]);
   muscleGroups = signal<MuscleGroup[]>([]);
   searchQuery = signal<string>('');
-  selectedMuscleGroupId = signal<number>(0);
+  selectedMuscleGroupId = signal<number>(0); // 0 means "all groups"
 
+  // Re-derived whenever any of the inputs change. AND-combined: pill filter then text filter.
   filteredExercises = computed(() => {
     let list = this.exercises();
     const mgId = this.selectedMuscleGroupId();
@@ -36,6 +57,7 @@ export class ExerciseListComponent implements OnInit {
   });
 
   ngOnInit(): void {
+    // Load both datasets in parallel; markForCheck after each because we're zoneless.
     this.exerciseService.getExercises().subscribe((exercises) => {
       this.exercises.set(exercises);
       this.cdr.markForCheck();
@@ -46,6 +68,7 @@ export class ExerciseListComponent implements OnInit {
     });
   }
 
+  // Plain (input) event instead of ngModel — keeps this component free of FormsModule.
   onSearchInput(event: Event): void {
     this.searchQuery.set((event.target as HTMLInputElement).value);
     this.cdr.markForCheck();
@@ -56,6 +79,7 @@ export class ExerciseListComponent implements OnInit {
     this.cdr.markForCheck();
   }
 
+  // O(n) lookup but n is tiny (number of muscle groups) so a Map would be premature.
   getMuscleGroupName(mgId: number): string {
     const mg = this.muscleGroups().find((g) => g.id === mgId);
     return mg ? mg.name : '';

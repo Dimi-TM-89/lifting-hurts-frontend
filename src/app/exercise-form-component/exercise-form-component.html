@@ -1,3 +1,13 @@
+<!--
+  Exercise add/edit form. Same shape as the muscle-group form, with one extra control:
+   - <select> for the muscle group, populated from `muscleGroups()` and bound to
+     `exerciseData().muscleGroupId` via two-way ngModel.
+   - The first <option> with value=0 is `disabled` so it acts as a placeholder, and the
+     `required` validator on the select rejects "0" because the typed value is the number
+     bound by ngModel (the empty initial state).
+  Errors use `[hidden]` (vs @if) to keep the layout stable as messages appear.
+-->
+
 @if (isSubmitted && errorMessage()) {
   <div class="rounded p-4 mb-4 text-lg bg-red-200 text-red-800 border-2 border-red-300">
     {{ errorMessage() }}
@@ -48,6 +58,8 @@
     </div>
   </div>
 
+  <!-- Muscle group selector — populated from the API. The first option is disabled so
+       it can act as a placeholder while still being the initial value (id=0). -->
   <div class="mb-6">
     <label for="muscleGroupId" class="block mb-2 text-sm font-medium text-gray-900"
       >Muscle Group</label

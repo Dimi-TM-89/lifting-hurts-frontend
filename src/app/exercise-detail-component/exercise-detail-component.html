@@ -1,3 +1,20 @@
+<!--
+  Exercise detail page.
+
+  Three conditional render branches:
+   1. Visitor or no exercise loaded yet → only the info card.
+   2. Logged-in user WITH history → info card + 3 stat cards + recent-history table.
+   3. Logged-in user WITHOUT history → info card + friendly "no history yet" message.
+
+  - `@if (exercise(); as ex)` aliases the signal value as `ex` for the whole block — saves
+    typing `exercise()!.imageUrl` everywhere and avoids null-check noise.
+  - The stat-cards grid is 1 col on mobile, 3 cols on md+ (each metric is small enough to
+    show side by side on tablets).
+  - `track $index` on the history table is fine because we never mutate the list — Angular
+    only adds rows when the data refreshes.
+  - `| date: 'mediumDate'` formats the ISO string into a localized date — DatePipe is
+    imported at the component level.
+-->
 @if (exercise(); as ex) {
   <div class="max-w-3xl mx-auto">
     <!-- Exercise info -->
@@ -16,7 +33,7 @@
       }
     </div>
 
-    <!-- Stats (logged-in only) -->
+    <!-- Stats (logged-in only AND has at least one logged set for this exercise) -->
     @if (isAuth() && setHistory().length > 0) {
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
         <div class="bg-white border border-gray-200 rounded-lg shadow p-6 text-center">
@@ -24,6 +41,7 @@
           <p class="text-sm text-gray-500 mt-1">Heaviest weight</p>
         </div>
         <div class="bg-white border border-gray-200 rounded-lg shadow p-6 text-center">
+          <!-- bestWorkSet is null when there's no history; aliased here to skip the null path -->
           @if (bestWorkSet(); as best) {
             <p class="text-3xl font-bold text-purple-600">{{ best.workSet }} kg</p>
             <p class="text-sm text-gray-500 mt-1">
@@ -37,7 +55,7 @@
         </div>
       </div>
 
-      <!-- Recent history -->
+      <!-- Recent history (capped at 20 rows in the component) -->
       <div class="bg-white border border-gray-200 rounded-lg shadow p-6 mb-6">
         <h2 class="text-xl font-semibold mb-4">Recent history</h2>
         <table class="min-w-full">
@@ -70,6 +88,7 @@
         </table>
       </div>
     } @else if (isAuth() && setHistory().length === 0) {
+      <!-- Logged-in but no data — friendly nudge to log a workout -->
       <div class="bg-white border border-gray-200 rounded-lg shadow p-6 mb-6 text-center">
         <p class="text-gray-400">
           No history yet for this exercise. Start a workout to track your progress!

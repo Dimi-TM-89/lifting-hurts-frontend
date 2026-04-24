@@ -1,3 +1,16 @@
+<!--
+  Dashboard layout: period selector → 4 stat cards → 2 detail panels (top exercises + muscle groups).
+
+  Notable patterns:
+   - Period buttons use a [class] binding instead of [class.active] so we can swap the entire
+     style set in one place (selected = blue solid, unselected = gray hover).
+   - The stat-cards grid uses 1 / 2 / 4 columns at sm / md / lg breakpoints — keeps numbers
+     readable on phones and packs them onto one row on desktop.
+   - The bar chart on the right is built without any chart library: each row's width is a
+     percentage of the largest value, computed inline via [style.width.%]. Cheaper than
+     pulling in chart.js for one tiny visualization.
+-->
+
 <!-- Period selector -->
 <div class="flex gap-2 mb-6">
   <button
@@ -35,7 +48,7 @@
   </button>
 </div>
 
-<!-- Stats cards -->
+<!-- Stats cards: each value is a computed() signal so they update reactively when the period changes -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
   <div class="bg-white border border-gray-200 rounded-lg shadow p-6 text-center">
     <p class="text-4xl font-bold text-blue-600">{{ totalWorkouts() }}</p>
@@ -60,6 +73,8 @@
   <div class="bg-white border border-gray-200 rounded-lg shadow p-6">
     <h2 class="text-xl font-semibold mb-4">Top exercises</h2>
     @if (topExercises().length > 0) {
+      <!-- let i = $index gives us the rank number; we use it to add a top border to all
+           rows except the first (visual separator without an extra wrapper element). -->
       @for (ex of topExercises(); track ex.name; let i = $index) {
         <div
           class="flex justify-between items-center py-2"
@@ -78,7 +93,7 @@
     }
   </div>
 
-  <!-- Muscle groups breakdown -->
+  <!-- Muscle groups breakdown — manual bar chart -->
   <div class="bg-white border border-gray-200 rounded-lg shadow p-6">
     <h2 class="text-xl font-semibold mb-4">Muscle groups trained</h2>
     @if (muscleGroupStats().length > 0) {
@@ -89,6 +104,8 @@
             <span class="text-gray-500">{{ mg.totalSets }} sets</span>
           </div>
           <div class="w-full bg-gray-100 rounded-full h-2">
+            <!-- Bar width = this row's count / largest row's count, expressed as a %.
+                 Index 0 is always the largest because the array is sorted desc. -->
             <div
               class="bg-blue-500 h-2 rounded-full"
               [style.width.%]="(mg.totalSets / muscleGroupStats()[0].totalSets) * 100"

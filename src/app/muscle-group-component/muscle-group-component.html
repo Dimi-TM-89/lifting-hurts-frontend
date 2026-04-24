@@ -1,3 +1,10 @@
+<!--
+  Card markup for one muscle group.
+  - flex-col + h-full: makes every card the same height inside the parent grid even if
+    descriptions are different lengths (the "View details" button stays bottom-aligned).
+  - The image is wrapped in @if so cards without an imageUrl don't show a broken image icon.
+  - exercises.length is shown as a teaser so users see how much content is behind each card.
+-->
 @if (muscleGroup) {
   <article
     class="flex flex-col justify-between h-full bg-white border-gray-200 border-2 p-6 shadow"

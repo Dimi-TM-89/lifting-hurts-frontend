@@ -1,3 +1,12 @@
+<!--
+  Exercise card.
+  - Whole article is clickable (cursor-pointer + (click)) — bigger tap target than a button.
+  - hover:shadow-lg + transition-shadow gives a subtle "lift on hover" affordance so users
+    realize it's interactive.
+  - Muscle group badge only renders when `muscleGroupName` was actually passed in
+    (the parent doesn't always have the related group loaded).
+  - `w-fit` on the badge prevents the pill from stretching to full card width.
+-->
 @if (exercise) {
   <article
     class="flex flex-col justify-between h-full bg-white border-gray-200 border-2 p-6 shadow hover:shadow-lg transition-shadow cursor-pointer"

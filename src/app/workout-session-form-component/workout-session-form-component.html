@@ -1,3 +1,24 @@
+<!--
+  Live workout form. Two main render branches based on `isActive`:
+   - Pre-session: just the big "Start Session" CTA.
+   - Active: notes + Add-Set form + logged-sets table + End button.
+
+  Custom exercise picker (instead of <select>):
+   - <button> opens a panel containing a search input, muscle-group filter pills, and a
+     scrollable list. Reuses the same UX as the public exercise list.
+   - Hidden form control `exerciseId` keeps the reactive form's validity in sync.
+
+  Add-Set form layout:
+   - 3-column grid (Reps / Weight / Add button) on md+ for fast logging on tablets.
+   - On mobile collapses to a single column.
+   - Inline error messages appear below the input only after `touched` to avoid shouting
+     at the user before they've interacted.
+
+  After each successful add, reps + weight are cleared but the chosen exercise is kept,
+  so logging "3 sets of bench" is just three quick number entries instead of re-picking
+  the exercise every time.
+-->
+
 @if (errorMessage()) {
   <div class="rounded p-4 mb-4 text-lg bg-red-200 text-red-800 border-2 border-red-300">
     {{ errorMessage() }}
@@ -33,7 +54,7 @@
       </button>
     </div>
 
-    <!-- Notes -->
+    <!-- Notes — kept in memory; only sent on End to avoid a request per keystroke -->
     <div class="mb-6">
       <label class="block mb-2 text-sm font-medium text-gray-900">Session Notes</label>
       <input
@@ -49,7 +70,8 @@
     <div class="bg-white border border-gray-200 rounded-lg shadow p-6 mb-6">
       <h2 class="text-xl font-semibold mb-4">Add a Set</h2>
 
-      <!-- Exercise Picker -->
+      <!-- Exercise Picker — custom dropdown (button + collapsible panel) instead of <select>
+           because we need search and muscle-group filter pills inside the dropdown. -->
       <div class="mb-4">
         <label class="block mb-2 text-sm font-medium text-gray-900">Exercise</label>
         <button
@@ -77,7 +99,8 @@
           </svg>
         </button>
 
-        <!-- Picker panel -->
+        <!-- Picker panel — shown only when open; max-h + overflow-y-auto bounds the height
+             so a long exercise catalog doesn't push the rest of the form off-screen -->
         @if (exercisePickerOpen()) {
           <div class="mt-2 border border-gray-200 rounded-lg shadow-lg bg-white p-4">
             <!-- Search -->
@@ -89,7 +112,7 @@
               class="w-full bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg p-2.5 mb-3"
             />
 
-            <!-- Muscle Group Filter -->
+            <!-- Muscle Group Filter — same id=0 = All convention as the public list -->
             <div class="flex flex-wrap gap-2 mb-3">
               <button
                 type="button"
@@ -119,7 +142,7 @@
               }
             </div>
 
-            <!-- Exercise List -->
+            <!-- Exercise list — bounded height + scroll so the picker stays compact -->
             <div class="max-h-60 overflow-y-auto">
               @for (exercise of filteredExercises(); track exercise.id) {
                 <button
@@ -142,7 +165,8 @@
         }
       </div>
 
-      <!-- Reps & Weight + Add button -->
+      <!-- Reps & Weight + Add button. Hidden exerciseId control keeps the form aware of the
+           picker selection. step="0.5" on weight allows half-kg plates (common in gyms). -->
       <form
         [formGroup]="setForm"
         (ngSubmit)="addSet()"
@@ -157,6 +181,7 @@
             placeholder="Enter reps"
             class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5"
           />
+          <!-- Inline error: only after touched, so we don't shout at a fresh form -->
           @if (setForm.get('reps')?.invalid && setForm.get('reps')?.touched) {
             <p class="text-red-500 text-sm mt-1">Enter reps (min 1)</p>
           }
@@ -186,7 +211,7 @@
       </form>
     </div>
 
-    <!-- Logged Sets -->
+    <!-- Logged Sets — running list, refreshed from the backend response of each addSet -->
     <div class="bg-white border border-gray-200 rounded-lg shadow p-6">
       <h2 class="text-xl font-semibold mb-4">Logged Sets</h2>
       @if (session.workoutSets && session.workoutSets.length > 0) {

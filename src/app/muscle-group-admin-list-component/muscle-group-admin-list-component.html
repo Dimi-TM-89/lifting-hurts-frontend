@@ -1,3 +1,16 @@
+<!--
+  Admin CRUD table for muscle groups.
+
+  Notable bits:
+   - `overflow-x-auto` lets the table scroll horizontally on mobile instead of breaking
+     the layout.
+   - Edit / delete are anchor tags with click handlers (no href) — using <a> rather than
+     <button> so they pick up the icon-link visual style. `cursor-pointer` makes the
+     pointer-cursor explicit since they have no href.
+   - The "&nbsp;" header keeps the actions column visually balanced without giving it a label.
+   - There's no confirmation dialog before delete — could be added later (e.g. a Tailwind
+     modal) but kept simple for the prototype.
+-->
 <div class="container mx-auto mt-8">
   @if (errorMessage()) {
     <div class="rounded p-4 mb-4 text-lg bg-red-200 text-red-800 border-2 border-red-300">
@@ -40,6 +53,7 @@
             </td>
             <td class="px-6 py-4 border-b border-gray-200">
               <div class="flex justify-end gap-4">
+                <!-- Edit icon — pencil SVG -->
                 <a
                   (click)="edit(mg.id)"
                   class="text-indigo-600 hover:text-indigo-900 cursor-pointer"
@@ -59,6 +73,7 @@
                     />
                   </svg>
                 </a>
+                <!-- Delete icon — trash SVG. No confirm dialog yet. -->
                 <a (click)="delete(mg.id)" class="cursor-pointer">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"

@@ -1,3 +1,12 @@
+<!--
+  Muscle group detail view.
+  - `muscleGroup$ | async; as muscleGroup` resolves the observable AND aliases its value,
+    so we can treat `muscleGroup` like a regular variable inside the block.
+  - The whole template is wrapped in the @if so we render nothing while the data is
+    loading (avoids "undefined" flashing in the UI).
+  - Each exercise row is an <a> with a click handler instead of routerLink to keep the
+    visual chevron + hover styles co-located with the navigation logic.
+-->
 @if (muscleGroup$ | async; as muscleGroup) {
   <div class="max-w-2xl mx-auto">
     <article class="bg-white border-gray-200 border-2 p-6 shadow rounded-lg">
@@ -22,6 +31,7 @@
               <span class="font-semibold">{{ exercise.name }}</span>
               <span class="text-gray-500 ml-2 text-sm">{{ exercise.description }}</span>
             </div>
+            <!-- Chevron icon — pure decoration to hint "click to navigate" -->
             <svg
               class="w-5 h-5 text-gray-400"
               fill="none"

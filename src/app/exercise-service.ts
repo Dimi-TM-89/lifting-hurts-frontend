@@ -1,3 +1,13 @@
+/*
+ * Service layer for /exercises endpoints.
+ *
+ * Same overall design as MuscleGroupService (singleton, environment-driven URL,
+ * observables back to the caller). Two extra read endpoints worth noting:
+ *  - getExercisesByMuscleGroup: server-side filter by FK — cheaper than client-side
+ *    filtering when the dataset gets large.
+ *  - searchByName: server-side LIKE query. NOTE: name is interpolated raw into the URL;
+ *    a hardening step would be to use HttpParams so special characters get encoded.
+ */
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -27,6 +37,7 @@ export class ExerciseService {
     return this.httpClient.get<Exercise[]>(`${this.apiUrl}/search?name=${name}`);
   }
 
+  // Admin-only on the backend; muscleGroupId is the FK linking the exercise to a group.
   postExercise(exercise: {
     name: string;
     description: string;

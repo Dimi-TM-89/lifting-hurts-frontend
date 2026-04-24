@@ -1,3 +1,18 @@
+/*
+ * Service layer for /muscle-groups endpoints.
+ *
+ * Design choices:
+ *  - `providedIn: 'root'` → singleton, tree-shakable, no need to declare it in any module.
+ *  - `inject(HttpClient)` instead of constructor injection → modern Angular style, lets us
+ *    declare the field as `private` + `readonly`-ish without a verbose constructor.
+ *  - apiUrl is built from `environment.apiUrl` so dev/prod can point to different backends
+ *    without code changes.
+ *  - GET methods are public (no token attached by interceptor); POST/PUT/DELETE will
+ *    automatically receive the JWT thanks to the allowedList in app.config.ts. The backend
+ *    enforces the admin role on those endpoints.
+ *  - Methods return `Observable<T>` rather than firing `.subscribe()` here — subscription
+ *    is the caller's responsibility (so they can use AsyncPipe, combine streams, etc.).
+ */
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
@@ -19,6 +34,7 @@ export class MuscleGroupService {
     return this.httpClient.get<MuscleGroup>(`${this.apiUrl}/${id}`);
   }
 
+  // Admin-only on the backend; we send only the writable fields, never `id` or `exercises`.
   postMuscleGroup(muscleGroup: {
     name: string;
     description: string;

@@ -1,3 +1,11 @@
+<!--
+  Admin CRUD table for exercises. Same structure as the muscle-group admin table; only the
+  data and one extra column (Muscle Group ID) differ.
+
+  Note: we display the raw FK (Muscle Group ID) here instead of resolving it to a name —
+  it's an admin tool, FK visibility is useful for debugging. The public exercise list does
+  resolve to a name.
+-->
 <div class="container mx-auto mt-8">
   @if (errorMessage()) {
     <div class="rounded p-4 mb-4 text-lg bg-red-200 text-red-800 border-2 border-red-300">
@@ -27,6 +35,7 @@
           <th class="px-6 py-3 text-xs font-medium text-left text-gray-500 border-b bg-gray-50">
             Description
           </th>
+          <!-- Raw FK exposed deliberately — admin debug aid -->
           <th class="px-6 py-3 text-xs font-medium text-left text-gray-500 border-b bg-gray-50">
             Muscle Group ID
           </th>

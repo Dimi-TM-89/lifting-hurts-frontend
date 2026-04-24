@@ -1,3 +1,14 @@
+/*
+ * Admin-only management table for exercises (CRUD).
+ *
+ * Mirrors MuscleGroupAdminListComponent — same patterns:
+ *  - Observable kept on the field, AsyncPipe in template = no manual subscribe/unsubscribe.
+ *  - `getAll()` is called on init AND after every successful delete to refresh the list.
+ *  - Form navigation passes `mode` and `id` via router state (not URL).
+ *  - cdr.markForCheck() after re-assigning the observable so AsyncPipe re-subscribes
+ *    under zoneless change detection.
+ *  - errorMessage signal drives the red banner when a delete fails.
+ */
 import { Component, inject, OnInit, signal, ChangeDetectorRef } from '@angular/core';
 import { Observable } from 'rxjs';
 import { Exercise } from '../exercise';

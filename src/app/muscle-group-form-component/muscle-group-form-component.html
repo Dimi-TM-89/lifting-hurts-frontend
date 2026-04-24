@@ -1,3 +1,18 @@
+<!--
+  Single template that serves both add and edit (heading + button label switch on the
+  isAdd / isEdit flags).
+
+  Form mechanics:
+   - Template-driven via FormsModule (note the `[(ngModel)]` two-way bindings).
+   - `#mgForm="ngForm"` exposes the whole form's validity to the submit button.
+   - `#name="ngModel"` exposes the control's validity to its inline error message.
+   - The "required" message uses `[hidden]` (not @if) so the layout doesn't shift when the
+     error appears — better UX in a tight form.
+   - The Image URL field is left optional on purpose (no required attribute).
+   - The submit button is disabled while invalid OR while a submit is in flight, preventing
+     double-submits.
+-->
+
 @if (isSubmitted && errorMessage()) {
   <div class="rounded p-4 mb-4 text-lg bg-red-200 text-red-800 border-2 border-red-300">
     {{ errorMessage() }}
@@ -26,6 +41,7 @@
       [(ngModel)]="muscleGroupData().name"
       #name="ngModel"
     />
+    <!-- Hide while pristine so we don't shout "required" before the user has typed anything. -->
     <div [hidden]="name.valid || name.pristine" class="text-red-500 mt-2">Name is required</div>
   </div>
 
@@ -48,6 +64,7 @@
     </div>
   </div>
 
+  <!-- Image URL: optional — no required attribute, no error message -->
   <div class="mb-6">
     <label for="imageUrl" class="block mb-2 text-sm font-medium text-gray-900">Image URL</label>
     <input
@@ -60,6 +77,7 @@
     />
   </div>
 
+  <!-- Submit button: label changes with mode, disabled while invalid or already submitted -->
   @if (isAdd) {
     <button
       type="submit"

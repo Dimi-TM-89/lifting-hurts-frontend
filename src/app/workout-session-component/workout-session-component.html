@@ -1,3 +1,18 @@
+<!--
+  My Workouts list.
+
+  Three states inside a single template:
+   1. Pending data → nothing rendered (AsyncPipe alias is null).
+   2. Empty → "No workout sessions yet" copy nudging the user to start one.
+   3. Has data → vertical list of session cards, each with its sets table.
+
+  Notes:
+   - `session.notes || 'Workout Session'` falls back to a generic title when the user
+     didn't fill in notes.
+   - DatePipe formats: 'medium' for the start date, 'shortTime' for the end (we already
+     show the full start, no need to repeat the date).
+   - Delete is a single click without a confirm dialog — could add one later for safety.
+-->
 <div class="container mx-auto mt-8">
   @if (errorMessage()) {
     <div class="rounded p-4 mb-4 text-lg bg-red-200 text-red-800 border-2 border-red-300">
@@ -50,6 +65,7 @@
               </button>
             </div>
 
+            <!-- Sets table — only rendered if there's at least one set; otherwise the friendly placeholder -->
             @if (session.workoutSets && session.workoutSets.length > 0) {
               <table class="min-w-full mt-4">
                 <thead>
@@ -71,6 +87,7 @@
                 <tbody>
                   @for (set of session.workoutSets; track set.id) {
                     <tr>
+                      <!-- Exercise can be missing (e.g. if it was deleted server-side) — show "Unknown" instead of crashing. -->
                       <td class="px-4 py-2 border-t font-medium">
                         {{ set.exercise?.name ?? 'Unknown' }}
                       </td>

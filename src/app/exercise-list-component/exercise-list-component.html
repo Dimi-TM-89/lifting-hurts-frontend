@@ -1,3 +1,15 @@
+<!--
+  Exercise list page = search box + muscle-group pills + responsive grid.
+
+  Layout decisions:
+   - Pills wrap with `flex-wrap gap-2` so the row stretches naturally as more groups are
+     added (no horizontal scroll, no overflow).
+   - The grid scales 1 → 2 → 3 → 4 columns at md / lg / xl. More columns than the muscle
+     group page because exercise cards are smaller.
+   - The search input is `[value]` + `(input)` (one-way + event) instead of [(ngModel)]
+     because the parent uses signals — no need to drag in FormsModule for one input.
+   - Empty-state message is intentionally outside the grid so it sits on its own row.
+-->
 <h1 class="text-4xl font-bold">Exercises</h1>
 
 <!-- Search bar -->
@@ -11,7 +23,7 @@
   />
 </div>
 
-<!-- Muscle group filter pills -->
+<!-- Muscle group filter pills — id=0 means "All", same convention as the picker in the workout form -->
 <div class="flex flex-wrap gap-2 mb-6">
   <button
     (click)="filterByMuscleGroup(0)"
@@ -42,6 +54,8 @@
 <!-- Exercise grid -->
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 mx-auto">
   @for (exercise of filteredExercises(); track exercise.id) {
+    <!-- Pass the muscle group's name down so the card can render the badge without a fetch.
+         `?? 0` covers the (rare) case of an exercise with no muscleGroupId. -->
     <app-exercise-component
       [exercise]="exercise"
       [muscleGroupName]="getMuscleGroupName(exercise.muscleGroupId ?? 0)"
