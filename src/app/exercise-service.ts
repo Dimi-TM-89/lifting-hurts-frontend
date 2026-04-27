@@ -9,7 +9,7 @@
  *    a hardening step would be to use HttpParams so special characters get encoded.
  */
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Exercise } from './exercise';
 import { environment } from '../environments/environment';
@@ -33,8 +33,10 @@ export class ExerciseService {
     return this.httpClient.get<Exercise[]>(`${this.apiUrl}/by-muscle-group/${muscleGroupId}`);
   }
 
+  // NOTE: name is interpolated raw into the URL; a hardening step would be to use HttpParams so special characters get encoded.
   searchByName(name: string): Observable<Exercise[]> {
-    return this.httpClient.get<Exercise[]>(`${this.apiUrl}/search?name=${name}`);
+    const params = new HttpParams().set('name', name);
+    return this.httpClient.get<Exercise[]>(`${this.apiUrl}/search`, { params });
   }
 
   // Admin-only on the backend; muscleGroupId is the FK linking the exercise to a group.

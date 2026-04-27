@@ -27,6 +27,21 @@
  *  - On select we patch the hidden `exerciseId` form control AND keep a separate
  *    `selectedExercise` signal so the picker button can show "name + group".
  *
+ * Resume across navigation:
+ *  - The component lifetime is tied to the route, so navigating away and back would
+ *    normally drop `session` + `isActive` and force the user to start over. To prevent
+ *    that the active session id is persisted via WorkoutSessionService:
+ *      • startSession  → service.setActiveSessionId(...) once the backend returns the id.
+ *      • ngOnInit      → service.getActiveSessionId(); if present, GET the session and
+ *                        jump straight back to the Active phase.
+ *      • endSession    → service.clearActiveSessionId() on the success path of the PUT.
+ *  - The localStorage key lives in the service so the list component can also read it
+ *    (to filter the in-flight session out of past workouts and show a Resume banner).
+ *  - Survives full page reloads and tab close/reopen for free.
+ *  - If the stored id no longer resolves (404 because it was deleted, 403 because a
+ *    different user logged in on the same browser) we drop the key silently. Network /
+ *    5xx errors are kept so a transient outage doesn't wipe valid in-flight state.
+ *
  * Date format helper: `formatDateTime` slices the ISO string to "YYYY-MM-DDTHH:mm:ss"
  * because the backend's LocalDateTime parser doesn't accept the trailing "Z" and millis.
  */
@@ -106,6 +121,35 @@ export class WorkoutSessionFormComponent implements OnInit {
     this.muscleGroupService.getMuscleGroups().subscribe((groups) => {
       this.muscleGroups.set(groups);
     });
+
+    // Pick up an in-flight session if startSession ran in a previous component lifetime
+    // (route change, page refresh, tab close/reopen). See the file header for the full flow.
+    this.tryResumeActiveSession();
+  }
+
+  // Re-hydrates an in-flight session from the backend if its id is still in storage.
+  // Stale keys (404/403) are dropped silently so the user lands on a clean "Start Session"
+  // screen. Network / 5xx errors leave the key in place — the next visit can retry.
+  private tryResumeActiveSession(): void {
+    const storedId = this.sessionService.getActiveSessionId();
+    if (storedId === null) return;
+
+    this.sessionService.getSessionById(storedId).subscribe({
+      next: (session) => {
+        this.session = session;
+        this.isActive = true;
+        this.startTime = new Date(session.startedAt);
+        this.cdr.markForCheck();
+      },
+      error: (err: HttpErrorResponse) => {
+        // 404 = deleted, 403 = different user logged in on this browser. Either way the
+        // stored id is meaningless to the current user — drop it. Other errors might be
+        // transient (offline, server hiccup) so we keep the key for the next try.
+        if (err.status === 404 || err.status === 403) {
+          this.sessionService.clearActiveSessionId();
+        }
+      },
+    });
   }
 
   // --- Exercise picker -------------------------------------------------------------------
@@ -143,6 +187,8 @@ export class WorkoutSessionFormComponent implements OnInit {
 
   // Persist the session to the backend immediately so we have an id to attach sets to.
   // endedAt is set to the same value as startedAt for now; it gets updated on End.
+  // We also stash the id via the service so navigating away and coming back resumes the
+  // workout instead of forcing a restart.
   startSession(): void {
     this.startTime = new Date();
     const session = {
@@ -155,6 +201,9 @@ export class WorkoutSessionFormComponent implements OnInit {
       next: (created) => {
         this.session = created;
         this.isActive = true;
+        // Cleared on endSession's success path; picked up by tryResumeActiveSession()
+        // and by the list component (to filter + show the Resume banner).
+        this.sessionService.setActiveSessionId(created.id);
         this.cdr.markForCheck();
       },
       error: (e: HttpErrorResponse) => this.errorMessage.set(e.message),
@@ -198,6 +247,8 @@ export class WorkoutSessionFormComponent implements OnInit {
   }
 
   // PUT to set the real endedAt + final notes, then leave the page.
+  // The resume key is cleared ONLY on the success path — if the PUT fails the session is
+  // still active from the user's perspective and they need to be able to retry End.
   endSession(): void {
     if (!this.session) return;
 
@@ -209,7 +260,10 @@ export class WorkoutSessionFormComponent implements OnInit {
     };
 
     this.sessionService.updateSession(this.session.id, updatedSession).subscribe({
-      next: () => this.router.navigateByUrl('/workout-sessions'),
+      next: () => {
+        this.sessionService.clearActiveSessionId();
+        this.router.navigateByUrl('/workout-sessions');
+      },
       error: (e: HttpErrorResponse) => this.errorMessage.set(e.message),
     });
   }

@@ -6,6 +6,14 @@
    2. Empty → "No workout sessions yet" copy nudging the user to start one.
    3. Has data → vertical list of session cards, each with its sets table.
 
+  Active session banner:
+   - When a session is in flight (activeSessionId != null), we render a yellow "Resume"
+     banner at the top and hide the "New Workout Session" button. The user can't start a
+     second concurrent session, and the banner makes the in-flight one impossible to miss.
+   - The active session itself is filtered out of the list (see loadSessions in the .ts);
+     without that it would show as a one-second workout because endedAt == startedAt
+     until End Session runs.
+
   Notes:
    - `session.notes || 'Workout Session'` falls back to a generic title when the user
      didn't fill in notes.
@@ -22,15 +30,40 @@
 
   <div class="mb-4">
     <h1 class="text-3xl font-bold">My Workouts</h1>
-    <div class="flex justify-end mt-2">
+    <!-- New Session button is hidden while a workout is in flight to prevent the user
+         from accidentally starting a second concurrent session. The Resume banner below
+         takes over as the primary CTA in that case. -->
+    @if (activeSessionId() === null) {
+      <div class="flex justify-end mt-2">
+        <button
+          class="px-4 py-2 rounded-md bg-sky-500 text-sky-100 hover:bg-sky-600"
+          (click)="newSession()"
+        >
+          New Workout Session
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Active session banner — only renders when there's an in-flight workout. -->
+  @if (activeSessionId() !== null) {
+    <div
+      class="flex justify-between items-center bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 mb-6"
+    >
+      <div>
+        <h2 class="text-lg font-semibold text-yellow-900">Active workout in progress</h2>
+        <p class="text-sm text-yellow-800 mt-1">
+          You have an unfinished session — pick up where you left off.
+        </p>
+      </div>
       <button
-        class="px-4 py-2 rounded-md bg-sky-500 text-sky-100 hover:bg-sky-600"
-        (click)="newSession()"
+        (click)="resumeSession()"
+        class="px-4 py-2 rounded-md bg-yellow-500 text-white hover:bg-yellow-600 cursor-pointer font-medium"
       >
-        New Workout Session
+        Resume
       </button>
     </div>
-  </div>
+  }
 
   @if (sessions$ | async; as sessions) {
     @if (sessions.length === 0) {

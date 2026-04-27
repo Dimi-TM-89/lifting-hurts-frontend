@@ -14,15 +14,16 @@
  *  - Two state booleans (`hamburgerOpen`, `adminDropdownOpen`) are plain fields, not
  *    signals: they're only ever read inside the template via direct binding and we use the
  *    cdr-free pattern of letting Angular re-render on click events. (zoneless re-renders
- *    on the originating event tick.)
- *  - logout() returns to a hard-coded localhost URL because Auth0 requires the returnTo
- *    URL to be in its allowed list — for prod this should be moved to environment.ts.
+ *    on the originating event tick.) *
  */
+
 import { NgClass } from '@angular/common';
 import { Component, computed, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { environment } from '../../environments/environment';
+import { WorkoutSessionService } from '../workout-session-service';
 
 @Component({
   selector: 'app-menu-component',
@@ -33,6 +34,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 export class MenuComponent {
   private router = inject(Router);
   private auth = inject(AuthService);
+  private sessionService = inject(WorkoutSessionService);
 
   hamburgerOpen = false;
   adminDropdownOpen = false;
@@ -81,8 +83,14 @@ export class MenuComponent {
   }
 
   logout(): void {
+    // Clear per-user state from localStorage before the redirect — otherwise the next
+    // user logging in on this browser would see the previous user's "active session"
+    // banner and other personal pointers. (Add new clears here as more per-user state
+    // is introduced.)
+    this.sessionService.clearActiveSessionId();
+
     this.auth.logout({
-      logoutParams: { returnTo: 'http://localhost:4200' },
+      logoutParams: { returnTo: environment.auth0.homeUri },
     });
   }
 }

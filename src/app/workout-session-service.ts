@@ -7,6 +7,13 @@
  * Important: we never send `auth0UserId` from the frontend. The backend pulls the user id
  * out of the JWT (`sub` claim) and sets it server-side. This makes it impossible for a
  * client to spoof another user's identity even if they tamper with the request body.
+ *
+ * Active session tracking:
+ *  - The id of an in-flight workout is persisted in localStorage (see the helpers at the
+ *    bottom of this file). Centralising the storage key here means the form component
+ *    (which writes/clears) and the list component (which reads to filter the in-flight
+ *    session out of past workouts and drive the "Resume" banner) share one source of
+ *    truth — no duplicated string keys floating around the codebase.
  */
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
@@ -59,5 +66,28 @@ export class WorkoutSessionService {
     set: { exerciseId: number; setNumber: number; reps: number; weightKg: number },
   ): Observable<WorkoutSession> {
     return this.httpClient.post<WorkoutSession>(`${this.apiUrl}/${sessionId}/sets`, set);
+  }
+
+  // --- Active session tracking ----------------------------------------------------------
+  // localStorage-backed pointer to the in-flight session, if any. Used by:
+  //   • WorkoutSessionFormComponent — writes on Start, reads on init (resume), clears on End.
+  //   • WorkoutSessionComponent     — reads to hide the in-flight session from the past-
+  //     workouts list and to render the Resume banner.
+  // The key is namespaced (lifting-hurts.…) to avoid colliding with anything else on
+  // localhost:4200 during development.
+
+  private readonly ACTIVE_SESSION_KEY = 'lifting-hurts.activeSessionId';
+
+  getActiveSessionId(): number | null {
+    const stored = localStorage.getItem(this.ACTIVE_SESSION_KEY);
+    return stored ? +stored : null;
+  }
+
+  setActiveSessionId(id: number): void {
+    localStorage.setItem(this.ACTIVE_SESSION_KEY, String(id));
+  }
+
+  clearActiveSessionId(): void {
+    localStorage.removeItem(this.ACTIVE_SESSION_KEY);
   }
 }
