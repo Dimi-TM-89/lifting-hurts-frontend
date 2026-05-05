@@ -17,7 +17,7 @@
  *    on the originating event tick.) *
  */
 
-import { NgClass } from '@angular/common';
+
 import { Component, computed, inject } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 import { AuthService } from '@auth0/auth0-angular';
@@ -27,7 +27,7 @@ import { WorkoutSessionService } from '../workout-session-service';
 
 @Component({
   selector: 'app-menu-component',
-  imports: [NgClass, RouterModule],
+  imports: [RouterModule],
   templateUrl: './menu-component.html',
   styleUrl: './menu-component.css',
 })

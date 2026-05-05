@@ -17,7 +17,7 @@
  *    value with `muscleGroupData()` in onSubmit().
  *  - `isSubmitted` flag prevents double-submits AND drives the error banner visibility.
  */
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MuscleGroupService } from '../muscle-group-service';
@@ -43,13 +43,20 @@ export class MuscleGroupFormComponent {
   isSubmitted = false;
   errorMessage = signal<string>('');
 
-  // Constructor injection here (instead of inject()) so we can read the navigation state
-  // immediately — currentNavigation() is only valid before the navigation completes,
-  // i.e. during construction.
-  constructor(
-    private router: Router,
-    private muscleGroupService: MuscleGroupService,
-  ) {
+  private router = inject(Router);
+  private muscleGroupService = inject(MuscleGroupService);
+
+  // Why read state in the constructor (and not ngOnInit)?
+  //  - `router.currentNavigation()` returns null once the navigation has completed.
+  //    The component is constructed mid-navigation, so the constructor is the only
+  //    point where the navigation (and therefore its state payload) is still live.
+  //    By the time ngOnInit runs, currentNavigation() would be null.
+  //  - This has nothing to do with how Router gets injected — `inject(Router)` runs
+  //    in the field initializer above, also during construction, so `this.router` is
+  //    fully set up before this constructor body executes. Either constructor-param
+  //    DI or `inject()` would work; we use `inject()` for consistency with the rest
+  //    of the codebase (see ExerciseFormComponent for the same pattern).
+  constructor() {
     const state = this.router.currentNavigation()?.extras.state || {};
     this.isAdd = state['mode'] === 'add';
     this.isEdit = state['mode'] === 'edit';
@@ -77,13 +84,19 @@ export class MuscleGroupFormComponent {
     if (this.isAdd) {
       this.muscleGroupService.postMuscleGroup(this.muscleGroupData()).subscribe({
         next: () => this.router.navigateByUrl('/admin/muscle-groups'),
-        error: (e: HttpErrorResponse) => this.errorMessage.set(e.message),
+        error: (e: HttpErrorResponse) => {
+          this.errorMessage.set(e.message);
+          this.isSubmitted = false;
+        },
       });
     }
     if (this.isEdit) {
       this.muscleGroupService.putMuscleGroup(this.muscleGroupId, this.muscleGroupData()).subscribe({
         next: () => this.router.navigateByUrl('/admin/muscle-groups'),
-        error: (e: HttpErrorResponse) => this.errorMessage.set(e.message),
+        error: (e: HttpErrorResponse) => {
+          this.errorMessage.set(e.message);
+          this.isSubmitted = false;
+        },
       });
     }
   }

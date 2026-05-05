@@ -4,28 +4,23 @@
     descriptions are different lengths (the "View details" button stays bottom-aligned).
   - The image is wrapped in @if so cards without an imageUrl don't show a broken image icon.
   - exercises.length is shown as a teaser so users see how much content is behind each card.
+  - `@let mg = muscleGroup()` aliases the signal call so the template uses plain property
+    access (`mg.name`) instead of calling the signal on every line.
 -->
-@if (muscleGroup) {
-  <article
-    class="flex flex-col justify-between h-full bg-white border-gray-200 border-2 p-6 shadow"
-  >
-    @if (muscleGroup.imageUrl) {
-      <img
-        [src]="muscleGroup.imageUrl"
-        [alt]="muscleGroup.name"
-        class="w-full h-48 object-cover rounded mb-3"
-      />
-    }
-    <h1 class="text-2xl font-bold my-2">{{ muscleGroup.name }}</h1>
-    <h4 class="text-md text-gray-500 my-1">{{ muscleGroup.description }}</h4>
-    <p class="text-sm text-gray-400 my-2">{{ muscleGroup.exercises.length }} exercises</p>
-    <p class="py-2">
-      <button
-        class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded"
-        (click)="detail(muscleGroup.id)"
-      >
-        View details
-      </button>
-    </p>
-  </article>
-}
+@let mg = muscleGroup();
+<article class="flex flex-col justify-between h-full bg-white border-gray-200 border-2 p-6 shadow">
+  @if (mg.imageUrl) {
+    <img [src]="mg.imageUrl" [alt]="mg.name" class="w-full h-48 object-cover rounded mb-3" />
+  }
+  <h1 class="text-2xl font-bold my-2">{{ mg.name }}</h1>
+  <h4 class="text-md text-gray-500 my-1">{{ mg.description }}</h4>
+  <p class="text-sm text-gray-400 my-2">{{ mg.exercises.length }} exercises</p>
+  <p class="py-2">
+    <button
+      class="bg-orange-500 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded"
+      (click)="detail(mg.id)"
+    >
+      View details
+    </button>
+  </p>
+</article>
